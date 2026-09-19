@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  =========================================================
+  Family Wallet Application
+  Copyright (c) 2026 Joseph Gati. All rights reserved.
+  =========================================================
+-->
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -29,6 +35,10 @@
             המשך עם חשבון Google
         </button>
         <p class="text-xs text-gray-400 mt-6 text-center max-w-xs">הגישה מורשית למשתמשים מוגדרים מראש בלבד.</p>
+        
+        <footer class="mt-auto pt-10 text-xs text-gray-400">
+            &copy; 2026 Joseph Gati. All rights reserved.
+        </footer>
     </div>
 
     <!-- Initialization Screen -->
@@ -64,6 +74,10 @@
             <div id="cards-container" class="space-y-4">
                 <!-- Dynamically populated entries -->
             </div>
+            
+            <footer class="mt-12 text-center text-xs text-gray-400 pb-4">
+                &copy; 2026 Joseph Gati. All rights reserved.
+            </footer>
         </main>
 
         <!-- Action Button -->
@@ -126,9 +140,10 @@
     <!-- Firebase SDK Implementation -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, onAuthStateChanged, signOut, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCdhJTwJSKQ6dibiRhommS1X1uJMDBm7R8",
             authDomain: "family-wallet-78d1d.firebaseapp.com",
@@ -146,6 +161,7 @@
         let currentUser = null;
         window.cardsData = {}; 
 
+        // DOM Elements Mapping
         const loginScreen = document.getElementById('login-screen');
         const loadingScreen = document.getElementById('loading-screen');
         const appScreen = document.getElementById('app-screen');
@@ -153,20 +169,22 @@
         const userAvatarContainer = document.getElementById('user-avatar-container');
         const errorMsg = document.getElementById('error-message');
 
-        async function verifyUserAccess(userEmail) {
+        // Access Verification against Firestore Database
+        async function verifyUserAccess(userId) {
             try {
-                const accessQuery = query(collection(db, "allowed_users"), where("email", "==", userEmail.toLowerCase()));
-                const querySnapshot = await getDocs(accessQuery);
-                return !querySnapshot.empty;
+                const docRef = doc(db, "allowed_users", userId);
+                const docSnap = await getDoc(docRef);
+                return docSnap.exists();
             } catch (error) {
                 console.error("Access verification failed:", error);
                 return false;
             }
         }
 
+        // Auth State Observer
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const isAuthorized = await verifyUserAccess(user.email);
+                const isAuthorized = await verifyUserAccess(user.uid);
                 
                 if (!isAuthorized) {
                     await signOut(auth);
@@ -194,6 +212,7 @@
             }
         });
 
+        // Event Listeners
         document.getElementById('google-login-btn').addEventListener('click', async () => {
             try {
                 errorMsg.classList.add('hide');
@@ -214,6 +233,7 @@
             signOut(auth);
         });
 
+        // Data Subscription
         function initializeDataStream() {
             const dataQuery = query(collection(db, "giftcards"), orderBy("updatedAt", "desc"));
             onSnapshot(dataQuery, (snapshot) => {
@@ -289,6 +309,7 @@
             });
         }
 
+        // Modal Controllers
         window.openModal = function(operationMode, documentId = '') {
             const modalComponent = document.getElementById('card-modal');
             const headerTitle = document.getElementById('modal-title');
@@ -322,6 +343,7 @@
             document.getElementById('card-form').reset();
         };
 
+        // Data Handlers
         document.getElementById('card-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             const targetId = document.getElementById('card-id').value;
