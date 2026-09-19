@@ -125,7 +125,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, onAuthStateChanged, signOut, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCdhJTwJSKQ6dibiRhommS1X1uJMDBm7R8",
@@ -164,24 +164,24 @@
                 appScreen.classList.remove('hide');
                 loadCards();
             } else {
-                getRedirectResult(auth).then((result) => {
-                    if (result && result.user) { } else {
-                        loadingScreen.classList.add('hide');
-                        appScreen.classList.add('hide');
-                        loginScreen.classList.remove('hide');
-                    }
-                }).catch((error) => {
-                    loadingScreen.classList.add('hide');
-                    loginScreen.classList.remove('hide');
-                    alert("שגיאה בהתחברות: " + error.message);
-                });
+                loadingScreen.classList.add('hide');
+                appScreen.classList.add('hide');
+                loginScreen.classList.remove('hide');
             }
         });
 
-        document.getElementById('google-login-btn').addEventListener('click', () => {
-            loadingScreen.classList.remove('hide');
-            loginScreen.classList.add('hide');
-            signInWithRedirect(auth, provider);
+        document.getElementById('google-login-btn').addEventListener('click', async () => {
+            try {
+                loadingScreen.classList.remove('hide');
+                loginScreen.classList.add('hide');
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                loadingScreen.classList.add('hide');
+                loginScreen.classList.remove('hide');
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    alert("שגיאה בהתחברות. נסה שנית.");
+                }
+            }
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
