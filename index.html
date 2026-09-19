@@ -169,10 +169,10 @@
         const userAvatarContainer = document.getElementById('user-avatar-container');
         const errorMsg = document.getElementById('error-message');
 
-        // Access Verification against Firestore Database
-        async function verifyUserAccess(userId) {
+        // Access Verification against Firestore Database by Email
+        async function verifyUserAccess(userEmail) {
             try {
-                const docRef = doc(db, "allowed_users", userId);
+                const docRef = doc(db, "allowed_users", userEmail.toLowerCase());
                 const docSnap = await getDoc(docRef);
                 return docSnap.exists();
             } catch (error) {
@@ -184,7 +184,7 @@
         // Auth State Observer
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const isAuthorized = await verifyUserAccess(user.uid);
+                const isAuthorized = await verifyUserAccess(user.email);
                 
                 if (!isAuthorized) {
                     await signOut(auth);
