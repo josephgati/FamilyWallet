@@ -1,5 +1,5 @@
 {
-  "name": "Family_Wallet",
+  "name": "Family Wallet",
   "short_name": "Wallet",
   "start_url": "./index.html",
   "display": "standalone",
